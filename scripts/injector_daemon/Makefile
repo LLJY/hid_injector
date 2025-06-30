@@ -1,9 +1,8 @@
 CC=gcc
 CFLAGS=-std=c11 -Wall -Wextra -g
-LDFLAGS=-lmicrohttpd -lpthread
+LDFLAGS=-lmicrohttpd -lpthread -lrt
 
 TARGET=injector_daemon
-
 SRCS=injector_daemon.c
 
 all: $(TARGET)

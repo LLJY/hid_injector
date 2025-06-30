@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HID Injector Architecture Flowchart (SVG)</title>
+    
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for icons used in the diagram (fa:fa-cogs, etc.) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Style for the text inside SVG nodes */
+        .svg-node-text {
+            font-size: 14px;
+            fill: #e0e7ff;
+            font-family: 'Inter', sans-serif;
+        }
+        .svg-node-text-bold {
+            font-weight: bold;
+        }
+        .svg-title-text {
+            font-size: 18px;
+            font-weight: bold;
+            fill: #e5e7eb;
+            text-anchor: middle;
+        }
+        .svg-icon-text {
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 flex items-center justify-center min-h-screen p-4 sm:p-6">
+
+    <div class="bg-gray-800 border border-gray-700 p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-7xl">
+        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-center text-white">
+            HID Injector - System Architecture
+        </h1>
+        
+        <svg width="100%" viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg">
+            <!-- Definitions for arrowheads -->
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#9ca3af" />
+                </marker>
+                <marker id="arrowhead-error" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#f87171" />
+                </marker>
+            </defs>
+
+            <!-- Legend -->
+            <g id="legend">
+                <rect x="200" y="10" width="800" height="60" rx="10" fill="#1f2937" stroke="#374151" />
+                <text x="220" y="42" class="svg-icon-text" fill="#a5b4fc"></text> <!-- cog -->
+                <text x="245" y="42" class="svg-node-text">Kernel Space</text>
+                <text x="385" y="42" class="svg-icon-text" fill="#67e8f9"></text> <!-- desktop -->
+                <text x="415" y="42" class="svg-node-text">USB Host</text>
+                <text x="530" y="42" class="svg-icon-text" fill="#f0abfc"></text> <!-- user -->
+                <text x="555" y="42" class="svg-node-text">User Space</text>
+                <text x="680" y="42" class="svg-icon-text" fill="#9ca3af"></text> <!-- exchange-alt -->
+                <text x="710" y="42" class="svg-node-text">Data Flow</text>
+                <text x="820" y="42" class="svg-icon-text" fill="#fcd34d"></text> <!-- bolt -->
+                <text x="845" y="42" class="svg-node-text">Trigger/Event</text>
+            </g>
+
+            <!-- Phase 1: Setup & Initialization -->
+            <g id="phase1">
+                <text x="600" y="120" class="svg-title-text">Phase 1: Setup & Initialization</text>
+                <!-- Nodes -->
+                <rect x="450" y="150" width="300" height="50" rx="8" fill="#166534" stroke="#4ade80"/>
+                <text x="600" y="180" text-anchor="middle" class="svg-node-text">Start: insmod hid_injector_v2.ko</text>
+                
+                <rect x="450" y="230" width="300" height="50" rx="25" fill="#166534" stroke="#4ade80"/>
+                <text x="600" y="260" text-anchor="middle" class="svg-node-text">hid_injector_init</text>
+                
+                <rect x="200" y="310" width="300" height="50" rx="8" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="350" y="340" text-anchor="middle" class="svg-node-text">usb_gadget_register_driver(...)</text>
+                
+                <rect x="700" y="310" width="300" height="50" rx="25" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="850" y="340" text-anchor="middle" class="svg-node-text">legacy_bind</text>
+
+                <rect x="700" y="390" width="300" height="50" rx="8" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="850" y="420" text-anchor="middle" class="svg-node-text">kzalloc hid_injector_dev</text>
+
+                <rect x="700" y="470" width="300" height="60" rx="8" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="850" y="495" text-anchor="middle" class="svg-node-text">Register Char Device</text>
+                <text x="850" y="515" text-anchor="middle" class="svg-node-text-bold">/dev/hid_injector</text>
+
+                <rect x="450" y="560" width="300" height="50" rx="8" fill="#166534" stroke="#4ade80"/>
+                <text x="600" y="590" text-anchor="middle" class="svg-node-text-bold">Module Ready for Host</text>
+
+                <rect x="50" y="470" width="300" height="50" rx="8" fill="#155e75" stroke="#67e8f9"/>
+                <text x="200" y="500" text-anchor="middle" class="svg-node-text">USB Host Connects</text>
+
+                <rect x="50" y="560" width="300" height="60" rx="25" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="200" y="585" text-anchor="middle" class="svg-node-text">legacy_setup handles</text>
+                <text x="200" y="605" text-anchor="middle" class="svg-node-text-bold">GET_DESCRIPTOR</text>
+
+                <!-- Arrows -->
+                <path d="M600,200 V230" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M600,280 Q550,280 500,310" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M500,335 H700" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M850,360 V390" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M850,440 V470" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M850,530 Q725,530 600,560" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M450,585 H350 Q350,585 200,520" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M200,520 V560" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+                <!-- Error Arrow -->
+                <path d="M850,360 C 950,400 950,650 850,675" stroke="#f87171" stroke-width="2" fill="none" marker-end="url(#arrowhead-error)" stroke-dasharray="5,5"/>
+                <rect x="700" y="675" width="150" height="40" rx="8" fill="#991b1b" stroke="#f87171"/>
+                <text x="775" y="700" text-anchor="middle" class="svg-node-text">Cleanup &amp; Fail</text>
+            </g>
+            
+            <!-- Phase 2: Runtime Keystroke Injection -->
+            <g id="phase2">
+                <text x="600" y="780" class="svg-title-text">Phase 2: Runtime Keystroke Injection</text>
+                <!-- Nodes -->
+                <rect x="100" y="810" width="300" height="60" rx="8" fill="#86198f" stroke="#f0abfc"/>
+                <text x="250" y="835" text-anchor="middle" class="svg-node-text">User-space Daemon writes "abc"</text>
+                <text x="250" y="855" text-anchor="middle" class="svg-node-text-bold">to /dev/hid_injector</text>
+
+                <rect x="500" y="815" width="250" height="50" rx="25" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="625" y="845" text-anchor="middle" class="svg-node-text">dev_write</text>
+
+                <rect x="850" y="815" width="300" height="50" rx="8" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="1000" y="845" text-anchor="middle" class="svg-node-text">memdup_user copies "abc" to kernel</text>
+
+                <rect x="500" y="900" width="250" height="50" rx="25" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="625" y="930" text-anchor="middle" class="svg-node-text">Loop through each char</text>
+                
+                <g id="inner-loop">
+                    <rect x="425" y="980" width="400" height="180" rx="15" fill="none" stroke="#4b5563" stroke-width="2" stroke-dasharray="5,5"/>
+                    <text x="625" y="1000" text-anchor="middle" class="svg-node-text">For each character ('a', 'b', 'c')...</text>
+
+                    <rect x="475" y="1020" width="300" height="50" rx="8" fill="#3730a3" stroke="#a5b4fc"/>
+                    <text x="625" y="1050" text-anchor="middle" class="svg-node-text">char_to_hid_keycode(char, &amp;modifier)</text>
+
+                    <rect x="475" y="1090" width="300" height="50" rx="25" fill="#3730a3" stroke="#a5b4fc"/>
+                    <text x="625" y="1120" text-anchor="middle" class="svg-node-text">hid_injector_send_report (Press)</text>
+                </g>
+                
+                <!-- Arrows -->
+                <path d="M400,840 H500" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M750,840 H850" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <!-- Corrected Arrow: memdup to loop -->
+                <path d="M1000,865 C 950,885 800,885 750,925" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M625,950 V980" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M625,1070 V1090" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <!-- Corrected Arrow: loopback with larger radius -->
+                <path d="M625,1140 C 625,1190 300,1190 300,925 C 300,850 500,880 500,900" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+            </g>
+        </svg>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Userspace Injector Daemon Flowchart (SVG)</title>
+    
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for icons used in the diagram -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .svg-node-text {
+            font-size: 14px;
+            fill: #e0e7ff;
+            font-family: 'Inter', sans-serif;
+        }
+        .svg-node-text-bold {
+            font-weight: bold;
+        }
+        .svg-title-text {
+            font-size: 18px;
+            font-weight: bold;
+            fill: #e5e7eb;
+            text-anchor: middle;
+        }
+        .svg-icon-text {
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 flex items-center justify-center min-h-screen p-4 sm:p-6">
+
+    <div class="bg-gray-800 border border-gray-700 p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-7xl">
+        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-center text-white">
+            Userspace Injector Daemon - Architecture
+        </h1>
+        
+        <svg width="100%" viewBox="0 0 1200 1400" xmlns="http://www.w3.org/2000/svg">
+            <!-- Definitions for arrowheads and Cherry MX Switch -->
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#9ca3af" />
+                </marker>
+                <g id="cherry-mx-switch">
+                    <rect x="-25" y="-25" width="50" height="50" rx="5" fill="#1f2937" stroke="#4b5563" stroke-width="2"/>
+                    <rect x="-15" y="-15" width="30" height="30" rx="3" fill="#dc2626"/>
+                    <path d="M -7 0 L 7 0 M 0 -7 L 0 7" stroke="#fee2e2" stroke-width="3" stroke-linecap="round"/>
+                </g>
+            </defs>
+
+            <!-- Phase 1: System Boot & Daemon Start -->
+            <g id="phase1">
+                <text x="600" y="50" class="svg-title-text">Phase 1: System Boot & Daemon Start</text>
+                <rect x="425" y="80" width="350" height="50" rx="8" fill="#166534" stroke="#4ade80"/>
+                <text x="600" y="110" text-anchor="middle" class="svg-node-text">1. `systemd` reads `/etc/modules-load.d/*.conf`</text>
+                
+                <rect x="425" y="160" width="350" height="50" rx="8" fill="#166534" stroke="#4ade80"/>
+                <text x="600" y="190" text-anchor="middle" class="svg-node-text">2. `modprobe` loads `hid_injector_v2.ko`</text>
+
+                <rect x="425" y="240" width="350" height="50" rx="8" fill="#166534" stroke="#4ade80"/>
+                <text x="600" y="270" text-anchor="middle" class="svg-node-text">3. `systemd` reaches `multi-user.target`</text>
+
+                <rect x="425" y="320" width="350" height="50" rx="8" fill="#166534" stroke="#4ade80"/>
+                <text x="600" y="350" text-anchor="middle" class="svg-node-text">4. Starts `hid-injector.service`</text>
+
+                <rect x="425" y="400" width="350" height="60" rx="25" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="600" y="425" text-anchor="middle" class="svg-node-text">5. C Program `main()` starts</text>
+                <text x="600" y="445" text-anchor="middle" class="svg-node-text-bold">Initializes GPIO & Web Server Thread</text>
+                
+                <!-- Arrows -->
+                <path d="M600,130 V160" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M600,210 V240" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M600,290 V320" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M600,370 V400" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+            </g>
+
+            <!-- Divider -->
+            <line x1="50" y1="480" x2="1150" y2="480" stroke="#374151" stroke-width="2"/>
+
+            <!-- Phase 2: Web Server Operation (Payload Staging) -->
+            <g id="phase2">
+                <text x="350" y="520" class="svg-title-text">Phase 2: Payload Staging</text>
+                
+                <rect x="100" y="550" width="500" height="60" rx="8" fill="#86198f" stroke="#f0abfc"/>
+                <text x="350" y="575" text-anchor="middle" class="svg-node-text">`curl` sends POST request with payload</text>
+                <text x="350" y="595" text-anchor="middle" class="svg-node-text-bold">e.g., --data 'a\nb\nc'</text>
+                
+                <rect x="100" y="650" width="500" height="50" rx="25" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="350" y="680" text-anchor="middle" class="svg-node-text">Web Server Thread (`post_handler`)</text>
+                
+                <rect x="100" y="740" width="500" height="50" rx="8" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="350" y="770" text-anchor="middle" class="svg-node-text">Accumulates data chunks from POST stream</text>
+                
+                <rect x="100" y="830" width="500" height="60" rx="8" fill="#16a34a" stroke="#4ade80"/>
+                <text x="350" y="855" text-anchor="middle" class="svg-node-text">Payload stored in global variable</text>
+                <text x="350" y="875" text-anchor="middle" class="svg-node-text-bold">`g_staged_payload`</text>
+
+                <!-- Arrows -->
+                <path d="M350,610 V650" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M350,700 V740" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M350,790 V830" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+            </g>
+
+            <!-- Phase 3: GPIO Trigger & Injection -->
+            <g id="phase3">
+                <text x="850" y="520" class="svg-title-text">Phase 3: Injection</text>
+                
+                <use href="#cherry-mx-switch" transform="translate(850, 610) scale(1.2)"/>
+                <text x="850" y="670" text-anchor="middle" class="svg-node-text">Physical Button Press</text>
+                
+                <rect x="700" y="710" width="300" height="50" rx="8" fill="#f97316"/>
+                <text x="850" y="740" text-anchor="middle" class="svg-node-text" fill="#1e293b">GPIO Interrupt (Falling Edge)</text>
+                
+                <rect x="700" y="800" width="300" height="50" rx="25" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="850" y="830" text-anchor="middle" class="svg-node-text">`poll()` in main loop unblocks</text>
+                
+                <rect x="700" y="890" width="300" height="50" rx="25" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="850" y="920" text-anchor="middle" class="svg-node-text">`perform_injection()` is called</text>
+                
+                <rect x="700" y="980" width="300" height="60" rx="8" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="850" y="1005" text-anchor="middle" class="svg-node-text">Reads `g_staged_payload`</text>
+                <text x="850" y="1025" text-anchor="middle" class="svg-node-text-bold">(Mutex Locked)</text>
+                
+                <rect x="700" y="1080" width="300" height="60" rx="8" fill="#3730a3" stroke="#a5b4fc"/>
+                <text x="850" y="1105" text-anchor="middle" class="svg-node-text">`write()` payload to device</text>
+                <text x="850" y="1125" text-anchor="middle" class="svg-node-text-bold">/dev/hid_injector</text>
+
+                <rect x="700" y="1180" width="300" height="50" rx="8" fill="#1f2937" stroke="#374151"/>
+                <text x="850" y="1210" text-anchor="middle" class="svg-node-text">To Kernel `dev_write`</text>
+                
+                <!-- Arrows -->
+                <path d="M850,680 V710" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M850,760 V800" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M850,850 V890" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M850,940 V980" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M850,1040 V1080" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                <path d="M850,1140 V1180" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+            </g>
+
+            <!-- Connecting Arrow between Phases -->
+            <path d="M 350 890 C 200 990, 550 1040, 700 1005" stroke="#9ca3af" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5"/>
+        </svg>
+    </div>
+
+</body>
+</html>

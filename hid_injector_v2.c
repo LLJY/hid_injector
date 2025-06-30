@@ -329,8 +329,6 @@ static int hid_injector_send_report(struct hid_injector_dev *dev, u8 *report)
     return status;
 }
 
-/* --- Legacy Gadget Driver Implementation --- */
-
 static int handle_string_request(struct usb_request *req, u8 index)
 {
     const char *req_str;
@@ -386,7 +384,6 @@ static void hid_set_config_work_handler(struct work_struct *w)
     /* Locate our endpoint descriptor just for reference and to assign later */
     ep_desc = (const struct usb_endpoint_descriptor *)&config_desc_raw[27];
 
-    /* --- NEW MATCHING LOGIC --- */
     /*
      * The dwc2 driver on this platform doesn't set ep->address, so we cannot
      * match by address. Instead, we find the first available endpoint that
@@ -408,7 +405,7 @@ static void hid_set_config_work_handler(struct work_struct *w)
     }
 
     /*
-     * CRITICAL: Now that we have the correct 'ep' object, we assign our
+     * now that we have the correct 'ep' object, we assign our
      * descriptor to it. This tells the UDC driver *how* to configure it
      * (max packet size, interval, etc.).
      */
@@ -467,7 +464,7 @@ static int legacy_setup(struct usb_gadget *gadget, const struct usb_ctrlrequest 
 
     case USB_DIR_OUT | USB_TYPE_STANDARD | USB_RECIP_DEVICE:
         if (ctrl->bRequest == USB_REQ_SET_CONFIGURATION && w_value == 1) {
-            /* FIX: Schedule with a delay to avoid a race with the UDC driver. */
+            /* schedule with a delay to avoid a race with the UDC driver. This prevents null references. */
             schedule_delayed_work(&dev->set_config_work, msecs_to_jiffies(20));
             value = 0;
         }
@@ -524,15 +521,12 @@ static void legacy_unbind(struct usb_gadget *gadget)
      */
     cancel_delayed_work_sync(&dev->set_config_work);
 
-    /* ---
-     * The Official Cleanup Sequence (Reverse of legacy_bind)
-     * ---
-     */
-
     /*
      * Step 1: Destroy the device file.
      * This signals udev in user-space to remove /dev/hid_injector.
      * It must be done BEFORE destroying the class.
+     * otherwise the /dev/hid_injector will point to a stale reference.
+     * causing future insmods to fail to work correctly.
      */
     device_destroy(dev->dev_class, MKDEV(dev->major, 0));
 

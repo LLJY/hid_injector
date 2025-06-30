@@ -1,6 +1,3 @@
-# Makefile for the HID Injector Gadget Driver
-
-# Name of the resulting kernel object
 obj-m := hid_injector_v2.o
 
 CFLAGS_REMOVE_hid_injector.o = -fmin-function-alignment=4

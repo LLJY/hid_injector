@@ -1,0 +1,46 @@
+# Kernel module build artifacts
+*.o
+*.ko
+*.mod
+*.mod.c
+*.mod.o
+*.order
+*.symvers
+modules.order
+Module.symvers
+.*.cmd
+.*.d
+
+# Compiled user-space programs
+# Add the name of your compiled user program here
+user_program
+
+# General build directories and files
+/build/
+*.out
+*.elf
+
+# Backup and swap files from editors like vim
+*~
+*.swp
+*.swo
+
+# IDE and editor specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Submission archives (as per your project spec)
+*.zip
+*.mp4
+*.docx
+*.pptx
+
+# Local configuration
+/local_config.h
+
